@@ -1,128 +1,135 @@
-# IBS Care AI
+# IBS Care AI - Professional Dashboard
 
-A professional, modern dashboard application for IBS (Irritable Bowel Syndrome) management with AI-powered personalized advice and comprehensive health tracking.
+A comprehensive, AI-powered IBS management application built with Streamlit, featuring a modern dashboard interface, AI chat assistant, and health tracking capabilities.
 
-## ✨ **New Professional Features**
+## ✨ Features
 
-### 🎯 **Modern Dashboard Interface**
-- **Professional Design**: Clean, organized layout with proper navigation
-- **Sidebar Navigation**: Easy access to all features
-- **Metric Cards**: Beautiful progress indicators with hover effects
-- **Responsive Layout**: Optimized for all screen sizes
+### Modern Dashboard Interface
+- **Welcome Screen**: Personalized onboarding experience
+- **Daily Health Log**: Track mood, symptoms, and diet
+- **Professional Metrics**: Clean, organized health overview
+- **Navigation**: Intuitive sidebar with multiple sections
 
-### 📊 **Enhanced Analytics**
-- **Real-time Metrics**: Mood, energy, symptoms, and tracking days
-- **Interactive Charts**: Professional Plotly visualizations
-- **Progress Tracking**: Weekly goals and achievement monitoring
-- **Trend Analysis**: Historical data visualization
+### Enhanced Analytics
+- **Health Metrics**: Total entries, recent mood, days tracked
+- **Data Visualization**: Clean tables and progress indicators
+- **History Tracking**: Filterable health data over time
+- **Trend Analysis**: Monitor your wellness journey
 
-### 💬 **AI Chat Assistant**
-- **Personalized Conversations**: Chat with your IBS care AI
-- **Real-time Advice**: Get instant support and recommendations
-- **Context Awareness**: AI remembers your health history
-- **Professional Responses**: Warm, supportive, and helpful
+### AI Chat Assistant
+- **Context-Aware Advice**: Personalized recommendations based on your health history
+- **Professional Interface**: Clean chat bubbles without emojis
+- **Gemini Integration**: Powered by Google's latest AI models
+- **Supportive Guidance**: Empathetic IBS management advice
 
-### 📱 **Organized Pages**
-- **📊 Dashboard**: Overview with key metrics and charts
-- **💬 AI Chat**: Interactive AI conversation
-- **📝 Daily Log**: Structured health entry form
-- **📈 History**: Comprehensive data analysis
-- **👤 Profile**: User account management
+### Organized Pages
+- **Dashboard**: Health overview and metrics
+- **AI Chat**: Interactive AI consultation
+- **Daily Log**: Easy health entry system
+- **History**: Comprehensive health records
+- **Profile**: Account management and preferences
 
-## 🚀 **Setup Instructions**
+### Professional Design Elements
+- **Dark Theme**: Modern, easy-on-the-eyes interface
+- **Gradient Headers**: Beautiful visual hierarchy
+- **Responsive Layout**: Works on desktop and mobile
+- **Clean Typography**: Professional appearance
+- **Color-Coded Elements**: Blue for inputs, Teal for AI, Purple for charts
 
-1. **Install Dependencies**:
-   ```bash
-   pip install -r requirements.txt
-   ```
+## 🚀 Quick Start
 
-2. **Get Google Gemini API Key**:
-   - Visit [Google AI Studio](https://makersuite.google.com/app/apikey)
-   - Create a new API key
-   - Copy the key for use in the app
+### Local Development
 
-3. **Configure API Key** (Choose one method):
-   
-   **Option A: Using .env file (Recommended)**:
-   - Create a `.env` file in the project directory
-   - Add your API key: `GEMINI_API_KEY=your_actual_api_key_here`
-   - The app will automatically load it
-   
-   **Option B: Manual input**:
-   - Run the app and enter your API key when prompted
-   
-4. **Run the Application**:
-   ```bash
-   streamlit run app.py
-   ```
-
-**Note**: Create a `.env` file in the project directory with `GEMINI_API_KEY=your_actual_api_key_here` to automatically load your API key.
-
-Example `.env` file content:
-```
-GEMINI_API_KEY=your_actual_api_key_here
+1. **Clone the repository**
+```bash
+git clone https://github.com/YOUR_USERNAME/ibs-care-ai.git
+cd ibs-care-ai
 ```
 
-5. **First Time Setup**:
-   - Enter your Google Gemini API key when prompted
-   - Enter your name (one-time setup)
-   - Start exploring the professional dashboard!
-
-## 🎨 **How to Use**
-
-### **Dashboard Overview**
-- View your weekly health metrics at a glance
-- Track mood, energy, symptoms, and progress
-- See beautiful charts and progress indicators
-
-### **AI Chat**
-- Click on "💬 AI Chat" in the sidebar
-- Ask questions about IBS management
-- Get personalized advice and support
-- Chat naturally with your AI assistant
-
-### **Daily Logging**
-- Use "📝 Daily Log" for structured entries
-- Track mood (1-10 scale) and energy levels
-- Log symptoms and diet details
-- Build your health history over time
-
-### **Progress Tracking**
-- Monitor weekly goals and achievements
-- View trends and patterns in your data
-- Track symptom severity changes
-- Celebrate your progress!
-
-## 📁 **File Structure**
-
-- `app.py`: Professional dashboard application
-- `requirements.txt`: Python dependencies
-- `.env`: Environment variables file (create this with your API key)
-- `ibs_care_data.csv`: Your health data storage (created automatically)
-
-## 🔒 **Data Privacy**
-
-All your data is stored locally in a CSV file on your machine. No data is sent to external servers except for AI advice generation through Google Gemini API.
-
-## 🏥 **Medical Disclaimer**
-
-This application is for wellness support only. Always consult with healthcare professionals for medical advice and treatment of IBS or any other health conditions.
-
-## 🛠 **Technical Features**
-
-- **Modern UI**: Professional dashboard design
-- **Real-time Updates**: Live data visualization
-- **Error Handling**: Robust error management
-- **Responsive Design**: Works on all devices
-- **Clean Code**: Modular, maintainable architecture
-
-## 🚀 **Ready to Run**
-
-Your professional IBS Care AI dashboard is now ready! Run with:
-
+2. **Install dependencies**
 ```bash
 pip install -r requirements.txt
+```
+
+3. **Set up environment variables**
+Create a `.env` file in the project root:
+```env
+GEMINI_API_KEY=your_gemini_api_key_here
+```
+
+4. **Run the application**
+```bash
 streamlit run app.py
 ```
 
-Enjoy your professional health management experience! 🌟
+### Deploy to Streamlit Community Cloud
+
+1. **Push to GitHub**
+```bash
+git add .
+git commit -m "Initial commit"
+git push origin main
+```
+
+2. **Deploy on Streamlit Cloud**
+- Go to [share.streamlit.io](https://share.streamlit.io)
+- Sign in with GitHub
+- Select your repository
+- Set main file path to `app.py`
+- Add your `GEMINI_API_KEY` in the secrets section
+- Click Deploy!
+
+## 🔧 Requirements
+
+- Python 3.8+
+- Streamlit 1.28.0+
+- Pandas 1.5.0+
+- Google Generative AI 0.3.0+
+- Python-dotenv 1.0.0+
+
+## 📁 Project Structure
+
+```
+ibs-care-ai/
+├── app.py              # Main application file
+├── requirements.txt    # Python dependencies
+├── .env               # Environment variables (create this)
+├── .gitignore         # Git ignore rules
+├── README.md          # This file
+└── ibs_care_data.csv  # Local data storage (auto-created)
+```
+
+## 🔐 Environment Variables
+
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `GEMINI_API_KEY` | Your Google Gemini API key | Yes |
+
+## 🌐 Live Demo
+
+Once deployed, your app will be available at:
+```
+https://your-app-name.streamlit.app
+```
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Submit a pull request
+
+## 📄 License
+
+This project is open source and available under the [MIT License](LICENSE).
+
+## 🆘 Support
+
+If you encounter any issues:
+1. Check the [Issues](https://github.com/YOUR_USERNAME/ibs-care-ai/issues) page
+2. Create a new issue with detailed information
+3. Ensure your `.env` file is properly configured
+
+---
+
+**Enjoy your wellness journey with IBS Care AI!** 🎯
