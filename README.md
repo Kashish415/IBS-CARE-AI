@@ -78,23 +78,32 @@ python app.py
 
 ```
 IBS-Care-AI/
-│── IBS_CARE_AI_FINAL/       # Final packaged version
-│── api/                     # Flask backend API (Python code)
-│   ├── start_backend.py     # Entry point for backend
-│   ├── requirements.txt     # Python dependencies
-│   └── ...                  # API routes, models, services
-│── src/                     # React frontend (TypeScript + Tailwind)
-│   ├── components/          # Reusable UI components
-│   ├── pages/               # App pages
-│   ├── App.tsx              # React root file
-│   └── index.tsx            # Entry point
-│── firestore.rules          # Firebase security rules
-│── firestore.indexes.json   # Firebase indexes
-│── package.json             # Frontend dependencies
-│── vite.config.ts           # Vite configuration
-│── tailwind.config.js       # Tailwind styling config
-│── vercel.json              # (optional) Vercel config
-│── README.md                # Documentation
+│── IBS_CARE_AI_FINAL/       
+│── api/                     
+│   ├── start_backend.py     
+│   ├── requirements.txt     
+│   └── ...                 
+│── src/                     
+│   ├── components/         
+│   ├── pages/              
+│   ├── App.tsx              
+│   └── index.tsx
+│── .gitignore
+│── README.md
+│── eslint.config.js
+│── firestore.indexes.json
+│── firestore.rules     
+│── index.html
+│── package-lock.json
+│── package.json     
+│── postcss.config.js 
+│── requirements.txt
+│── start_backend.py
+│── tailwind.config.js 
+│── tsconfig.app.json        
+│── tsconfig.json         
+│── tsconfig.node.json      
+│── vite.config.ts                      
 
 ```
 
