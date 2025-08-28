@@ -78,16 +78,24 @@ python app.py
 
 ```
 IBS-Care-AI/
-│── IBS_CARE_AI_FINAL/       
+│── IBS_CARE_AI_FINAL/
+    ├── backend/
+          ├── app.py
+          └── requirements.txt
+    ├── .gitignore
+    └──  README.md
 │── api/                     
-│   ├── start_backend.py     
-│   ├── requirements.txt     
-│   └── ...                 
+│   ├── chat.py     
+│   ├── health.py   
+│   └── llm_adapter.py                
 │── src/                     
-│   ├── components/         
+│   ├── components/
+    ├── lib/    
 │   ├── pages/              
-│   ├── App.tsx              
-│   └── index.tsx
+│   ├── App.tsx
+    ├── index.tsx
+    ├── main.tsx 
+│   └── vite-env.d.ts
 │── .gitignore
 │── README.md
 │── eslint.config.js
@@ -103,7 +111,7 @@ IBS-Care-AI/
 │── tsconfig.app.json        
 │── tsconfig.json         
 │── tsconfig.node.json      
-│── vite.config.ts                      
+└── vite.config.ts                      
 
 ```
 
