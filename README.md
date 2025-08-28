@@ -10,6 +10,7 @@ well-being.
 * **AI-Powered Insights**: Personalized suggestions and severity assessment using AI models.
 * **Health History**: View and analyze past logs for studying patterns.
 * **Profile Dashboard**: Summarized health data in an easy-to-read format and chart visualizations.
+* **User Authentication** – Firebase-based secure login & signup.
 * **Free Assessment**: Get to know your IBS type, severity and personalised insights by taking our health assessment tests.
 
 ## Tech Stack
@@ -76,20 +77,25 @@ python app.py
 ## File Structure
 
 ```
-ibs-care-ai/
-│── backend/
-│   ├── app.py              # Flask backend + API routes
-│   ├── static/             # React build served here
-│   ├── models/             # AI/ML logic (LangChain, Pydantic)
-│   ├── requirements.txt    # Python dependencies
-│   ├── .env                # Environment variables
-│
-│── frontend/
-│   ├── src/                # React components & pages
-│   ├── package.json        # Frontend dependencies
-│   ├── tailwind.config.js  # Styling config
-│
-└── README.md
+IBS-Care-AI/
+│── IBS_CARE_AI_FINAL/       # Final packaged version
+│── api/                     # Flask backend API (Python code)
+│   ├── start_backend.py     # Entry point for backend
+│   ├── requirements.txt     # Python dependencies
+│   └── ...                  # API routes, models, services
+│── src/                     # React frontend (TypeScript + Tailwind)
+│   ├── components/          # Reusable UI components
+│   ├── pages/               # App pages
+│   ├── App.tsx              # React root file
+│   └── index.tsx            # Entry point
+│── firestore.rules          # Firebase security rules
+│── firestore.indexes.json   # Firebase indexes
+│── package.json             # Frontend dependencies
+│── vite.config.ts           # Vite configuration
+│── tailwind.config.js       # Tailwind styling config
+│── vercel.json              # (optional) Vercel config
+│── README.md                # Documentation
+
 ```
 
 ## Contributing
