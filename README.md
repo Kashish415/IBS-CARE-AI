@@ -100,5 +100,9 @@ IBS-Care-AI/
 
 ## Contributing
 
-Contributions are welcome! Please fork the repo and create a pull request with clear commit messages.
+Contributions are welcome! 
+1. Fork this repo
+2. Create a new branch
+3. Commit changes with proper messages
+4. Submit a PR for review
 
