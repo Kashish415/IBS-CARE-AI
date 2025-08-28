@@ -1,0 +1,54 @@
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+.venv/
+venv/
+.env
+.env.local
+.env.production
+
+# Build outputs
+dist/
+build/
+*.egg-info/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Firebase
+.firebase/
+firebase-debug.log
+firestore-debug.log
+
+# Keys
+*.json
+!package*.json
+!tsconfig*.json
+!*config*.json
+serviceAccount.json
+
+# Logs
+*.log
+logs/
+
+# Testing
+coverage/
+.nyc_output/
+.pytest_cache/
+
+# Misc
+.cache/
+temp/
