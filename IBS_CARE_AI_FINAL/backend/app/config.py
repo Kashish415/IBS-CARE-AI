@@ -19,8 +19,7 @@ class Config:
     MAIL_USERNAME = os.getenv('MAIL_USERNAME', '')
     MAIL_PASSWORD = os.getenv('MAIL_PASSWORD', '')
     
-    # CORS
-    ALLOWED_ORIGINS = os.getenv('ALLOWED_ORIGINS', 'http://localhost:5173')
+    ALLOWED_ORIGINS = os.getenv('ALLOWED_ORIGINS', 'http://localhost:5173,https://ibs-care-ai.onrender.com')
     
     # Debug
     DEBUG = os.getenv('DEBUG', '0').lower() in ('1', 'true', 'yes')
