@@ -145,7 +145,7 @@ const Logs: React.FC = () => {
     setShowForm(true)
   }
 
-  const handleDelete = async (logId: string) => {
+  const handleDelete = async (dateISO: string) => {
     if (!window.confirm('Are you sure you want to delete this log?')) {
       return
     }
@@ -522,7 +522,8 @@ const Logs: React.FC = () => {
                             <Edit3 className="h-4 w-4" />
                           </button>
                           <button
-                            onClick={() => handleDelete(log.id || '')}
+{/*                             onClick={() => handleDelete(log.id || '')} */}
+                            onClick={() => handleDelete(log.dateISO)}
                             className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                             title="Delete log"
                           >
