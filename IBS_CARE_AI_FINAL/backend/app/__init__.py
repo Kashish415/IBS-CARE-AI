@@ -21,6 +21,10 @@ def create_app():
         email_service.init_email_service(app)
     except Exception as e:
         app.logger.warning(f"Email service initialization warning: {e}")
+        
+    @app.route('/')
+    def root():
+        return {"message": "IBS Care AI API", "status": "running", "version": "1.0.0"}
 
     from .routers import health, auth_verify, logs, chat, assessment, reminders
     app.register_blueprint(health.bp, url_prefix='/api')
