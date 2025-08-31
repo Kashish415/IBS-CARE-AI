@@ -19,7 +19,7 @@ class Config:
     MAIL_USERNAME = os.getenv('MAIL_USERNAME', '')
     MAIL_PASSWORD = os.getenv('MAIL_PASSWORD', '')
     
-    ALLOWED_ORIGINS = os.getenv('ALLOWED_ORIGINS', 'http://localhost:5173,https://ibs-care-ai.onrender.com')
+    ALLOWED_ORIGINS = os.getenv('ALLOWED_ORIGINS', 'http://localhost:5173,https://ibs-care-ai.vercel.app')
     
     # Debug
     DEBUG = os.getenv('DEBUG', '0').lower() in ('1', 'true', 'yes')
