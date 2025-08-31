@@ -145,32 +145,25 @@ const Logs: React.FC = () => {
     setShowForm(true)
   }
 
-  const handleDelete = async (dateISO: string) => {
+ const handleDelete = async (logId: string) => {
     if (!window.confirm('Are you sure you want to delete this log?')) {
-      if (window.confirm('Are you sure you want to delete this log?')) {
-      try {
-        await api.delete(`/logs/${dateISO}`)
-        setSuccess('Log deleted successfully!')
-        await fetchLogs()
-      } catch (error: any) {
-        console.error('Failed to delete log:', error)
-        setError('Failed to delete log')
-      }
+      return
     }
-  }
 
-  //     return
-  //   }
+    if (!user) {
+      setError('You must be logged in to delete logs')
+      return
+    }
 
-  //   try {
-  //     // Note: Delete functionality would need to be implemented in backend API
-  //     // For now, show a message that this feature is coming soon
-  //     setError('Delete functionality coming soon. Please contact support if you need logs removed.')
-  //   } catch (error: any) {
-  //     console.error('❌ Failed to delete log:', error)
-  //     setError('Failed to delete log')
-  //   }
-  // }
+    try {
+      console.log('🗑️ Deleting health log:', logId)
+      await backendAPI.deleteHealthLog(user.uid, logId)
+      setSuccess('Log deleted successfully!')
+      await fetchLogs()
+    } catch (error: any) {
+      console.error('❌ Failed to delete log:', error)
+      setError('Failed to delete log')
+    }
 
   const resetForm = () => {
     setFormData({
