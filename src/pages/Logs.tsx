@@ -145,20 +145,20 @@ const Logs: React.FC = () => {
     setShowForm(true)
   }
 
-  const handleDelete = async (dateISO: string) => {
-    if (!window.confirm('Are you sure you want to delete this log?')) {
-      return
-    }
+  // const handleDelete = async (logId: string) => {
+  //   if (!window.confirm('Are you sure you want to delete this log?')) {
+  //     return
+  //   }
 
-    try {
-      // Note: Delete functionality would need to be implemented in backend API
-      // For now, show a message that this feature is coming soon
-      setError('Delete functionality coming soon. Please contact support if you need logs removed.')
-    } catch (error: any) {
-      console.error('❌ Failed to delete log:', error)
-      setError('Failed to delete log')
-    }
-  }
+  //   try {
+  //     // Note: Delete functionality would need to be implemented in backend API
+  //     // For now, show a message that this feature is coming soon
+  //     setError('Delete functionality coming soon. Please contact support if you need logs removed.')
+  //   } catch (error: any) {
+  //     console.error('❌ Failed to delete log:', error)
+  //     setError('Failed to delete log')
+  //   }
+  // }
 
   const resetForm = () => {
     setFormData({
