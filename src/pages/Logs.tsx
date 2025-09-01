@@ -38,6 +38,7 @@ const Logs: React.FC = () => {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [deleting, setDeleting] = useState<string | null>(null)
+  const [submitting, setSubmitting] = useState(false)
   const { user } = useAuth()
 
   const [formData, setFormData] = useState({
@@ -60,35 +61,73 @@ const Logs: React.FC = () => {
   ]
 
   useEffect(() => {
-    fetchLogs()
-  }, [])
+    if (user) {
+      fetchLogs()
+    }
+  }, [user])
 
   const fetchLogs = async () => {
     try {
       setLoading(true)
+      setError('')
+      
       const response = await api.get('/logs')
+      console.log('Logs API response:', response.data)
 
-      // Ensure we always set an array
-      const logsData = response.data
-      if (Array.isArray(logsData)) {
-        // Sort logs by date descending (most recent first)
-        const sortedLogs = logsData.sort((a: LogEntry, b: LogEntry) => 
-          new Date(b.dateISO).getTime() - new Date(a.dateISO).getTime()
-        )
-        setLogs(sortedLogs)
-      } else if (logsData && Array.isArray(logsData.logs)) {
-        const sortedLogs = logsData.logs.sort((a: LogEntry, b: LogEntry) => 
-          new Date(b.dateISO).getTime() - new Date(a.dateISO).getTime()
-        )
-        setLogs(sortedLogs)
+      // Handle different response structures
+      let logsData: LogEntry[] = []
+      
+      if (Array.isArray(response.data)) {
+        logsData = response.data
+      } else if (response.data && Array.isArray(response.data.logs)) {
+        logsData = response.data.logs
+      } else if (response.data && Array.isArray(response.data.data)) {
+        logsData = response.data.data
       } else {
-        setLogs([])
-        console.log('No logs data available, using empty array')
+        console.log('Unexpected response structure:', response.data)
+        logsData = []
       }
+
+      // Ensure each log has required properties
+      const validLogs = logsData.filter(log => 
+        log && 
+        typeof log === 'object' && 
+        log.dateISO && 
+        typeof log.mood === 'number'
+      )
+
+      // Sort logs by date descending (most recent first)
+      const sortedLogs = validLogs.sort((a: LogEntry, b: LogEntry) => 
+        new Date(b.dateISO).getTime() - new Date(a.dateISO).getTime()
+      )
+      
+      setLogs(sortedLogs)
+      console.log('Processed logs:', sortedLogs)
+      
     } catch (error: any) {
       console.error('Failed to fetch logs:', error)
-      setError('Failed to load logs')
-      setLogs([]) // Ensure logs is always an array even on error
+      console.error('Error details:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status
+      })
+      
+      // More specific error messages
+      if (error.response?.status === 401) {
+        setError('Authentication required. Please log in again.')
+      } else if (error.response?.status === 403) {
+        setError('Access denied. Please check your permissions.')
+      } else if (error.response?.status === 404) {
+        setError('Logs endpoint not found. Please contact support.')
+      } else if (error.response?.status >= 500) {
+        setError('Server error. Please try again later.')
+      } else if (!error.response) {
+        setError('Network error. Please check your connection.')
+      } else {
+        setError(error.response?.data?.message || error.response?.data?.error || 'Failed to load logs')
+      }
+      
+      setLogs([])
     } finally {
       setLoading(false)
     }
@@ -98,6 +137,7 @@ const Logs: React.FC = () => {
     e.preventDefault()
     setError('')
     setSuccess('')
+    setSubmitting(true)
 
     try {
       const logData = {
@@ -107,7 +147,10 @@ const Logs: React.FC = () => {
         symptoms: formData.symptoms.split(',').map(s => s.trim()).filter(Boolean)
       }
 
+      console.log('Submitting log data:', logData)
+
       if (editingLog) {
+        // Use ID for consistency with delete operation
         await api.put(`/logs/${editingLog.id}`, logData)
         setSuccess('Log updated successfully!')
       } else {
@@ -119,7 +162,21 @@ const Logs: React.FC = () => {
       resetForm()
     } catch (error: any) {
       console.error('Failed to save log:', error)
-      setError(error.response?.data?.error || 'Failed to save log')
+      console.error('Submit error details:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status
+      })
+      
+      if (error.response?.status === 400) {
+        setError('Invalid data. Please check your inputs.')
+      } else if (error.response?.status === 401) {
+        setError('Authentication required. Please log in again.')
+      } else {
+        setError(error.response?.data?.message || error.response?.data?.error || 'Failed to save log')
+      }
+    } finally {
+      setSubmitting(false)
     }
   }
 
@@ -130,12 +187,14 @@ const Logs: React.FC = () => {
       mood: log.mood,
       pain_level: log.pain_level,
       energy_level: log.energy_level || 5,
-      notes: log.notes,
-      triggers: log.triggers.join(', '),
-      meals: log.meals?.join(', ') || '',
-      symptoms: log.symptoms?.join(', ') || ''
+      notes: log.notes || '',
+      triggers: Array.isArray(log.triggers) ? log.triggers.join(', ') : '',
+      meals: Array.isArray(log.meals) ? log.meals.join(', ') : '',
+      symptoms: Array.isArray(log.symptoms) ? log.symptoms.join(', ') : ''
     })
     setShowForm(true)
+    setError('')
+    setSuccess('')
   }
 
   const handleDelete = async (logId: string) => {
@@ -144,7 +203,7 @@ const Logs: React.FC = () => {
       return
     }
 
-    if (!window.confirm('Are you sure you want to delete this log?')) {
+    if (!window.confirm('Are you sure you want to delete this log? This action cannot be undone.')) {
       return
     }
 
@@ -153,12 +212,26 @@ const Logs: React.FC = () => {
       setError('')
       setSuccess('')
       
+      console.log('Deleting log with ID:', logId)
       await api.delete(`/logs/${logId}`)
+      
       setSuccess('Log deleted successfully!')
       await fetchLogs()
     } catch (error: any) {
       console.error('Failed to delete log:', error)
-      setError(error.response?.data?.error || 'Failed to delete log')
+      console.error('Delete error details:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status
+      })
+      
+      if (error.response?.status === 404) {
+        setError('Log not found. It may have already been deleted.')
+      } else if (error.response?.status === 401) {
+        setError('Authentication required. Please log in again.')
+      } else {
+        setError(error.response?.data?.message || error.response?.data?.error || 'Failed to delete log')
+      }
     } finally {
       setDeleting(null)
     }
@@ -192,6 +265,14 @@ const Logs: React.FC = () => {
     if (pain <= 6) return 'text-yellow-600 bg-yellow-50'
     return 'text-red-600 bg-red-50'
   }
+
+  // Clear messages after a delay
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => setSuccess(''), 5000)
+      return () => clearTimeout(timer)
+    }
+  }, [success])
 
   if (!user) {
     return (
@@ -259,8 +340,15 @@ const Logs: React.FC = () => {
               </div>
               
               <button
-                onClick={() => setShowForm(!showForm)}
-                className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-xl text-white bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 shadow-lg transition-all duration-200"
+                onClick={() => {
+                  setShowForm(!showForm)
+                  if (!showForm) {
+                    setError('')
+                    setSuccess('')
+                  }
+                }}
+                disabled={loading}
+                className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-xl text-white bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Plus className="h-5 w-5 mr-2" />
                 {showForm ? 'Cancel' : 'Add New Log'}
@@ -269,13 +357,32 @@ const Logs: React.FC = () => {
 
             {/* Error/Success Messages */}
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
-                {error}
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 flex items-center justify-between">
+                <span>{error}</span>
+                <button 
+                  onClick={() => setError('')}
+                  className="text-red-500 hover:text-red-700 ml-4"
+                >
+                  ×
+                </button>
               </div>
             )}
             {success && (
-              <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-6">
-                {success}
+              <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-6 flex items-center justify-between">
+                <span>{success}</span>
+                <button 
+                  onClick={() => setSuccess('')}
+                  className="text-green-500 hover:text-green-700 ml-4"
+                >
+                  ×
+                </button>
+              </div>
+            )}
+
+            {/* Debug Info - Remove in production */}
+            {process.env.NODE_ENV === 'development' && (
+              <div className="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded-lg mb-6 text-sm">
+                <strong>Debug:</strong> Logs count: {logs.length}, Loading: {loading.toString()}, User: {user ? 'authenticated' : 'not authenticated'}
               </div>
             )}
 
@@ -298,6 +405,7 @@ const Logs: React.FC = () => {
                         onChange={(e) => setFormData({ ...formData, dateISO: e.target.value })}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
                         required
+                        disabled={submitting}
                       />
                     </div>
 
@@ -312,6 +420,7 @@ const Logs: React.FC = () => {
                         value={formData.mood}
                         onChange={(e) => setFormData({ ...formData, mood: parseInt(e.target.value) })}
                         className="w-full"
+                        disabled={submitting}
                       />
                       <div className="flex justify-between text-xs text-gray-500 mt-1">
                         <span>Very Low</span>
@@ -330,6 +439,7 @@ const Logs: React.FC = () => {
                         value={formData.pain_level}
                         onChange={(e) => setFormData({ ...formData, pain_level: parseInt(e.target.value) })}
                         className="w-full"
+                        disabled={submitting}
                       />
                       <div className="flex justify-between text-xs text-gray-500 mt-1">
                         <span>No Pain</span>
@@ -348,6 +458,7 @@ const Logs: React.FC = () => {
                         value={formData.energy_level}
                         onChange={(e) => setFormData({ ...formData, energy_level: parseInt(e.target.value) })}
                         className="w-full"
+                        disabled={submitting}
                       />
                       <div className="flex justify-between text-xs text-gray-500 mt-1">
                         <span>Very Low</span>
@@ -366,6 +477,7 @@ const Logs: React.FC = () => {
                       onChange={(e) => setFormData({ ...formData, triggers: e.target.value })}
                       placeholder="e.g., dairy, stress, coffee"
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                      disabled={submitting}
                     />
                   </div>
 
@@ -379,6 +491,7 @@ const Logs: React.FC = () => {
                       onChange={(e) => setFormData({ ...formData, meals: e.target.value })}
                       placeholder="e.g., oatmeal, chicken salad, pasta"
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                      disabled={submitting}
                     />
                   </div>
 
@@ -392,6 +505,7 @@ const Logs: React.FC = () => {
                       onChange={(e) => setFormData({ ...formData, symptoms: e.target.value })}
                       placeholder="e.g., bloating, cramping, diarrhea"
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                      disabled={submitting}
                     />
                   </div>
 
@@ -405,21 +519,33 @@ const Logs: React.FC = () => {
                       rows={3}
                       placeholder="Additional notes about your day..."
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                      disabled={submitting}
                     />
                   </div>
 
                   <div className="flex space-x-3">
                     <button
                       type="submit"
-                      className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 transition-all duration-200"
+                      disabled={submitting}
+                      className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      <Save className="h-5 w-5 mr-2" />
-                      {editingLog ? 'Update Log' : 'Save Log'}
+                      {submitting ? (
+                        <>
+                          <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                          {editingLog ? 'Updating...' : 'Saving...'}
+                        </>
+                      ) : (
+                        <>
+                          <Save className="h-5 w-5 mr-2" />
+                          {editingLog ? 'Update Log' : 'Save Log'}
+                        </>
+                      )}
                     </button>
                     <button
                       type="button"
                       onClick={resetForm}
-                      className="inline-flex items-center px-6 py-3 border border-gray-300 text-base font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+                      disabled={submitting}
+                      className="inline-flex items-center px-6 py-3 border border-gray-300 text-base font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       Cancel
                     </button>
@@ -430,8 +556,16 @@ const Logs: React.FC = () => {
 
             {/* Logs List */}
             <div className="bg-white rounded-xl shadow-lg border border-gray-100">
-              <div className="p-6 border-b border-gray-100">
+              <div className="p-6 border-b border-gray-100 flex items-center justify-between">
                 <h2 className="text-xl font-semibold text-gray-900">Your Health History</h2>
+                {!loading && logs.length > 0 && (
+                  <button
+                    onClick={fetchLogs}
+                    className="text-sm text-purple-600 hover:text-purple-700 font-medium"
+                  >
+                    Refresh
+                  </button>
+                )}
               </div>
               
               {loading ? (
@@ -439,15 +573,37 @@ const Logs: React.FC = () => {
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto mb-4"></div>
                   <p className="text-gray-600">Loading logs...</p>
                 </div>
+              ) : error && logs.length === 0 ? (
+                <div className="p-8 text-center">
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+                    <Calendar className="h-12 w-12 text-red-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-red-800 mb-2">Unable to Load Logs</h3>
+                    <p className="text-red-600 mb-4">{error}</p>
+                    <button
+                      onClick={fetchLogs}
+                      className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-red-600 hover:bg-red-700 transition-colors"
+                    >
+                      Try Again
+                    </button>
+                  </div>
+                </div>
               ) : logs.length === 0 ? (
                 <div className="p-8 text-center">
                   <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-600">No logs yet. Start tracking your health!</p>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No logs yet</h3>
+                  <p className="text-gray-600 mb-4">Start tracking your health to see your progress over time!</p>
+                  <button
+                    onClick={() => setShowForm(true)}
+                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 transition-colors"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create Your First Log
+                  </button>
                 </div>
               ) : (
                 <div className="divide-y divide-gray-100">
                   {logs.map((log) => (
-                    <div key={log.id} className="p-6 hover:bg-gray-50 transition-colors">
+                    <div key={log.id || log.dateISO} className="p-6 hover:bg-gray-50 transition-colors">
                       <div className="flex justify-between items-start">
                         <div className="flex-1">
                           <div className="flex items-center space-x-4 mb-3">
@@ -479,21 +635,21 @@ const Logs: React.FC = () => {
                             </div>
                           </div>
                           
-                          {log.triggers && log.triggers.length > 0 && (
+                          {log.triggers && Array.isArray(log.triggers) && log.triggers.length > 0 && (
                             <div className="mb-2">
                               <span className="text-sm text-gray-600">Triggers: </span>
                               <span className="text-sm">{log.triggers.join(', ')}</span>
                             </div>
                           )}
 
-                          {log.meals && log.meals.length > 0 && (
+                          {log.meals && Array.isArray(log.meals) && log.meals.length > 0 && (
                             <div className="mb-2">
                               <span className="text-sm text-gray-600">Meals: </span>
                               <span className="text-sm">{log.meals.join(', ')}</span>
                             </div>
                           )}
 
-                          {log.symptoms && log.symptoms.length > 0 && (
+                          {log.symptoms && Array.isArray(log.symptoms) && log.symptoms.length > 0 && (
                             <div className="mb-2">
                               <span className="text-sm text-gray-600">Symptoms: </span>
                               <span className="text-sm">{log.symptoms.join(', ')}</span>
@@ -508,22 +664,30 @@ const Logs: React.FC = () => {
                         <div className="flex items-center space-x-2 ml-4">
                           <button
                             onClick={() => handleEdit(log)}
-                            className="p-2 text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
-                            disabled={deleting === log.id}
+                            className="p-2 text-purple-600 hover:bg-purple-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            disabled={deleting === log.id || submitting}
+                            title="Edit log"
                           >
                             <Edit3 className="h-4 w-4" />
                           </button>
-                          <button
-                            onClick={() => handleDelete(log.id)}
-                            disabled={deleting === log.id}
-                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                          >
-                            {deleting === log.id ? (
-                              <div className="h-4 w-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
-                            ) : (
+                          {log.id ? (
+                            <button
+                              onClick={() => handleDelete(log.id)}
+                              disabled={deleting === log.id || submitting}
+                              className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                              title="Delete log"
+                            >
+                              {deleting === log.id ? (
+                                <div className="h-4 w-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
+                              ) : (
+                                <Trash2 className="h-4 w-4" />
+                              )}
+                            </button>
+                          ) : (
+                            <div className="p-2 text-gray-400" title="Cannot delete: No ID">
                               <Trash2 className="h-4 w-4" />
-                            )}
-                          </button>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -531,6 +695,18 @@ const Logs: React.FC = () => {
                 </div>
               )}
             </div>
+
+            {/* Retry button for when there's an error but some logs exist */}
+            {error && logs.length > 0 && (
+              <div className="mt-4 text-center">
+                <button
+                  onClick={fetchLogs}
+                  className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+                >
+                  Retry Loading
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
